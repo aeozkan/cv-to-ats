@@ -8,7 +8,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { rawText, targetRole } = await req.json();
+    const { rawText, targetRole, outputLanguage, translate } = await req.json();
     if (!rawText || typeof rawText !== "string") {
       return new Response(JSON.stringify({ error: "rawText is required" }), {
         status: 400,
@@ -19,26 +19,44 @@ Deno.serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY missing");
 
+    const lang = outputLanguage === "tr" ? "tr" : "en";
+    const langName = lang === "tr" ? "Turkish (Türkçe)" : "English";
+    const sectionHeaders =
+      lang === "tr"
+        ? `   - İLETİŞİM
+   - PROFESYONEL ÖZET
+   - YETENEKLER
+   - PROFESYONEL DENEYİM
+   - EĞİTİM
+   - SERTİFİKALAR
+   - PROJELER`
+        : `   - CONTACT
+   - PROFESSIONAL SUMMARY
+   - SKILLS
+   - PROFESSIONAL EXPERIENCE
+   - EDUCATION
+   - CERTIFICATIONS
+   - PROJECTS`;
+
+    const translateInstruction = translate
+      ? `\nTRANSLATION REQUIRED: The source resume may be in a different language. Translate ALL content into ${langName}, using natural, professional ATS-optimized terminology native to ${langName} (do not produce literal/awkward translations). Keep proper nouns (names, companies, universities, product/tech names) in their original form. Use industry-standard ${langName} job titles and skill terms.`
+      : `\nLANGUAGE: Produce the entire output in ${langName}. If the source is already in ${langName}, preserve original wording where appropriate; otherwise still output in ${langName} using professional ATS terminology.`;
+
     const systemPrompt = `You are an ATS (Applicant Tracking System) resume optimization expert.
 You will receive raw text extracted from a resume (which may contain artifacts from tables, columns, or graphics) and an optional target role.
 
 Your job:
 1. Clean the text: strip artifacts, fix ordering, remove non-ATS friendly elements (icons, emojis, table residue, multi-column jumbles, special bullets).
 2. Reorganize content into a strict standard ATS layout with these sections in this exact order (omit any section that has no content):
-   - CONTACT
-   - PROFESSIONAL SUMMARY
-   - SKILLS
-   - PROFESSIONAL EXPERIENCE
-   - EDUCATION
-   - CERTIFICATIONS
-   - PROJECTS
+${sectionHeaders}
 3. Use plain text only. Use simple "- " bullets. Use uppercase section headers.
 4. For each job in EXPERIENCE: "Job Title | Company | Location | Start – End" on one line, then bullet achievements.
-5. Suggest 8-15 missing industry keywords relevant to the target role (or inferred role) that would improve ATS match score, plus an estimated current ATS score (0-100).
+5. Suggest 8-15 missing industry keywords relevant to the target role (or inferred role) that would improve ATS match score, plus an estimated current ATS score (0-100). Keywords, reasons, and improvement tips MUST also be written in ${langName}.
+${translateInstruction}
 
 Return ONLY via the provided tool call.`;
 
-    const userPrompt = `Target role: ${targetRole || "(infer from resume)"}\n\nRAW RESUME TEXT:\n${rawText}`;
+    const userPrompt = `Target role: ${targetRole || "(infer from resume)"}\nDesired output language: ${langName}\nTranslate if needed: ${translate ? "yes" : "no"}\n\nRAW RESUME TEXT:\n${rawText}`;
 
     const body = {
       model: "google/gemini-3-flash-preview",
