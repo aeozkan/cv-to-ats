@@ -16,7 +16,11 @@ export function generateAtsPdf(text: string, filename = "resume-ats.pdf") {
   const lines = text.split("\n");
   for (const rawLine of lines) {
     const line = rawLine.replace(/\s+$/g, "");
-    const isHeader = /^[A-Z][A-Z0-9 &/\-]+$/.test(line.trim()) && line.trim().length > 2;
+    const trimmed = line.trim();
+    const isHeader =
+      trimmed.length > 2 &&
+      trimmed === trimmed.toUpperCase() &&
+      /^[A-ZÇĞİÖŞÜ][A-ZÇĞİÖŞÜ0-9 &/\-]+$/.test(trimmed);
 
     if (isHeader) {
       if (y + lineHeight > pageHeight - margin) {
@@ -26,7 +30,7 @@ export function generateAtsPdf(text: string, filename = "resume-ats.pdf") {
       y += 6;
       doc.setFont("helvetica", "bold");
       doc.setFontSize(13);
-      doc.text(line.trim(), margin, y);
+      doc.text(trimmed, margin, y);
       y += lineHeight;
       // underline
       doc.setLineWidth(0.5);
