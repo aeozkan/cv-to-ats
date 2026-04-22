@@ -7,12 +7,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { toast } from "@/hooks/use-toast";
-import { Download, FileUp, Languages, Loader2, Sparkles } from "lucide-react";
+import { Download, FileUp, Languages, Loader2, Sparkles, MessageSquare } from "lucide-react";
 import { extractTextFromFile } from "@/lib/extractText";
 import { generateAtsPdf } from "@/lib/generatePdf";
 import { supabase } from "@/integrations/supabase/client";
 import { type Lang, t, detectLanguage } from "@/lib/i18n";
+import { AssistantChat } from "@/components/AssistantChat";
 
 type Keyword = { keyword: string; reason: string };
 type AtsResult = {
