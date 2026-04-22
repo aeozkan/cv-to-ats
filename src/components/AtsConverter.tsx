@@ -7,12 +7,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { toast } from "@/hooks/use-toast";
-import { Download, FileUp, Languages, Loader2, Sparkles } from "lucide-react";
+import { Download, FileUp, Languages, Loader2, Sparkles, MessageSquare } from "lucide-react";
 import { extractTextFromFile } from "@/lib/extractText";
 import { generateAtsPdf } from "@/lib/generatePdf";
 import { supabase } from "@/integrations/supabase/client";
 import { type Lang, t, detectLanguage } from "@/lib/i18n";
+import { AssistantChat } from "@/components/AssistantChat";
 
 type Keyword = { keyword: string; reason: string };
 type AtsResult = {
@@ -251,9 +253,27 @@ export function AtsConverter() {
                 <CardTitle>{tr.resumeTitle}</CardTitle>
                 <CardDescription>{tr.resumeDesc}</CardDescription>
               </div>
-              <Button onClick={handleDownload} disabled={!editedResume}>
-                <Download /> {tr.download}
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button variant="secondary" disabled={!editedResume}>
+                      <MessageSquare /> {tr.assistantTitle}
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="right" className="w-full p-0 sm:max-w-md">
+                    <AssistantChat
+                      currentResume={editedResume}
+                      outputLang={outputLang}
+                      uiLang={uiLang}
+                      targetRole={targetRole || result?.detected_role}
+                      onResumeUpdate={setEditedResume}
+                    />
+                  </SheetContent>
+                </Sheet>
+                <Button onClick={handleDownload} disabled={!editedResume}>
+                  <Download /> {tr.download}
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <Textarea
