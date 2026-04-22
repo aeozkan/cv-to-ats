@@ -253,9 +253,27 @@ export function AtsConverter() {
                 <CardTitle>{tr.resumeTitle}</CardTitle>
                 <CardDescription>{tr.resumeDesc}</CardDescription>
               </div>
-              <Button onClick={handleDownload} disabled={!editedResume}>
-                <Download /> {tr.download}
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button variant="secondary" disabled={!editedResume}>
+                      <MessageSquare /> {tr.assistantTitle}
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="right" className="w-full p-0 sm:max-w-md">
+                    <AssistantChat
+                      currentResume={editedResume}
+                      outputLang={outputLang}
+                      uiLang={uiLang}
+                      targetRole={targetRole || result?.detected_role}
+                      onResumeUpdate={setEditedResume}
+                    />
+                  </SheetContent>
+                </Sheet>
+                <Button onClick={handleDownload} disabled={!editedResume}>
+                  <Download /> {tr.download}
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <Textarea
