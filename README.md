@@ -1,3 +1,3 @@
 # Welcome to your Lovable project
 
-TODO: Document your project here
+lovable.dev ile yaptığım ATS Optimizer Pro web sitesi
